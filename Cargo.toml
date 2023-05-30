@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 color-thief = "0.2.2"
 image = "0.24.6"
+rgb = "0.8.36"

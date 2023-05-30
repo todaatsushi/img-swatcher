@@ -7,7 +7,7 @@ fn get_args() -> Result<Vec<String>, ArgErr> {
     let args: Vec<String> = env::args().collect();
 
     match args.len() {
-        3 => Ok(args),
+        4 => Ok(args),
         _ => Err(ArgErr::InvalidArgsNum(args.len().try_into().unwrap())),
     }
 }
@@ -47,4 +47,12 @@ pub fn get_num_colors() -> Result<u8, ArgErr> {
         }
         Err(_e) => Err(ArgErr::CouldntReadValue(num_colors)),
     }
+}
+
+pub fn get_desination_path() -> Result<String, ArgErr> {
+    let dest = match get_args() {
+        Ok(args) => args[3].clone(),
+        Err(e) => return Err(e),
+    };
+    Ok(dest)
 }

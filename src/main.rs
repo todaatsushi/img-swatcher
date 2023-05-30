@@ -2,14 +2,14 @@ use std::usize;
 
 use color_thief;
 
-use colors::commands;
+use colors::call_args;
 use image::RgbImage;
 
 const HEIGHT: u32 = 30;
 const WIDTH: u32 = 300;
 
 fn main() {
-    let img = match commands::open_image() {
+    let img = match call_args::open_image() {
         Ok(i) => i,
         Err(e) => {
             println!("{}", e);
@@ -17,7 +17,7 @@ fn main() {
         }
     };
 
-    let max_colors = match commands::get_num_colors() {
+    let max_colors = match call_args::get_num_colors() {
         Ok(i) => i,
         Err(e) => {
             println!("{}", e);
@@ -25,7 +25,7 @@ fn main() {
         }
     };
 
-    let destination_path = match commands::get_desination_path() {
+    let destination_path = match call_args::get_desination_path() {
         Ok(p) => p,
         Err(e) => {
             println!("{}", e);

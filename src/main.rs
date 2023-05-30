@@ -1,72 +1,72 @@
-use std::{env, fmt::Display, path};
+use std::usize;
 
-use image::DynamicImage;
-use {color_thief, image};
+use color_thief;
 
-enum ArgErr {
-    NotEnoughArgs,
-}
+use colors::commands;
+use image::RgbImage;
 
-impl Display for ArgErr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ArgErr::NotEnoughArgs => {
-                write!(f, "Not enough arguments provided to the call. You need to give 2 arguments - the file path and the max number of colors.")
-            }
-        }
-    }
-}
-
-enum FileErr {
-    CouldntRead,
-}
-
-fn get_args() -> Result<Vec<String>, ArgErr> {
-    let args: Vec<String> = env::args().collect();
-
-    match args.len() {
-        2 => Ok(args),
-        _ => Err(ArgErr::NotEnoughArgs),
-    }
-}
-
-fn open_image() -> Result<DynamicImage, FileErr> {
-    match get_args() {
-        Ok(args) => {
-            let arg = &args[1];
-            let path = path::Path::new(arg);
-            match image::open(path) {
-                Ok(img) => Ok(img),
-                Err(_e) => {
-                    println!("Image error. File might not exist so check the path. Otherwise, try another file.");
-                    Err(FileErr::CouldntRead)
-                }
-            }
-        }
-        Err(e) => {
-            println!("{}", e);
-            Err(FileErr::CouldntRead)
-        }
-    }
-}
+const HEIGHT: u32 = 30;
+const WIDTH: u32 = 300;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let file_path = path::Path::new(&args[1]);
+    let img = match commands::open_image() {
+        Ok(i) => i,
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    };
 
-    let img = image::open(file_path).expect("Couldn't open image.");
+    let max_colors = match commands::get_num_colors() {
+        Ok(i) => i,
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    };
+
+    let destination_path = match commands::get_desination_path() {
+        Ok(p) => p,
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    };
+
     let ct = color_thief::get_palette(
         img.to_rgb8().into_raw().as_slice(),
         color_thief::ColorFormat::Rgb,
         1,
-        10,
+        max_colors,
     );
 
     match ct {
-        Ok(c) => {
-            for (i, color) in c.iter().enumerate() {
-                let hex = format!("#{:x?}{:x?}{:x?}", color.r, color.g, color.b);
-                println!("{}. {}", i, hex);
+        Ok(colors) => {
+            let mut new_img = RgbImage::new(WIDTH, HEIGHT);
+
+            let num_colors = colors.len();
+            let bucket_width: u32 = WIDTH / num_colors as u32;
+
+            for (x, _, pixel) in new_img.enumerate_pixels_mut() {
+                let mut idx = (x as f32 / bucket_width as f32).floor() as usize;
+                if idx >= num_colors {
+                    idx -= 1;
+                }
+
+                let color = colors[idx];
+                *pixel = image::Rgb([color.r, color.g, color.b]);
+            }
+
+            let res = new_img.save(destination_path.clone());
+            match res {
+                Ok(_img) => {
+                    let msg = format!("Image saved in {}.", destination_path);
+                    println!("{}", msg);
+                }
+                Err(e) => {
+                    println!("{:?}", e);
+                    println!("Couldn't save image.")
+                }
             }
         }
         Err(_) => println!("Couldn't fetch colors from the file."),

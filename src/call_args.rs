@@ -1,9 +1,8 @@
-use image::DynamicImage;
-use std::{env, path};
+use std::env;
 
-use crate::exceptions::{ArgErr, FileErr};
+use crate::exceptions::ArgErr;
 
-fn get_args() -> Result<Vec<String>, ArgErr> {
+pub fn get_args() -> Result<Vec<String>, ArgErr> {
     let args: Vec<String> = env::args().collect();
 
     match args.len() {
@@ -11,27 +10,6 @@ fn get_args() -> Result<Vec<String>, ArgErr> {
         _ => Err(ArgErr::InvalidArgsNum(args.len().try_into().unwrap())),
     }
 }
-
-pub fn open_image() -> Result<DynamicImage, FileErr> {
-    match get_args() {
-        Ok(args) => {
-            let arg = &args[1];
-            let path = path::Path::new(arg);
-            match image::open(path) {
-                Ok(img) => Ok(img),
-                Err(_e) => {
-                    println!("Image error. File might not exist so check that the file exists at that location. Otherwise, try another file.");
-                    Err(FileErr::CouldntRead)
-                }
-            }
-        }
-        Err(e) => {
-            println!("{}", e);
-            Err(FileErr::CouldntRead)
-        }
-    }
-}
-
 pub fn get_num_colors() -> Result<u8, ArgErr> {
     let num_colors = match get_args() {
         Ok(args) => args[2].clone(),

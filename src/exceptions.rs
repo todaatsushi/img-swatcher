@@ -15,7 +15,7 @@ impl Display for ArgErr {
                 println!("Got invalid number of arguments ({})", num - 1);
                 write!(
                     f,
-                    "You need to give 3 arguments - the file path, the max number of colors, and the destination path (incl the filename)."
+                    "You need to give 3 arguments - the file path, the max number of colors, and the destination folder (no filenames)."
                 )
             }
             ArgErr::BadColorNumber(num) => {

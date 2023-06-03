@@ -1,10 +1,12 @@
+use std::path::PathBuf;
+
 use image::{Rgb, RgbImage};
 use rgb::RGB;
 
 const HEIGHT: u32 = 50;
 const WIDTH: u32 = 500;
 
-pub fn create_swatch(colors: Vec<RGB<u8>>, destination_path: String) {
+pub fn create_swatch(colors: Vec<RGB<u8>>, destination_path: PathBuf) {
     let mut new_img = RgbImage::new(WIDTH, HEIGHT);
 
     let num_colors = colors.len();
@@ -20,10 +22,13 @@ pub fn create_swatch(colors: Vec<RGB<u8>>, destination_path: String) {
         *pixel = Rgb([color.r, color.g, color.b]);
     }
 
-    let res = new_img.save(destination_path.clone());
+    let res = new_img.save(destination_path.clone().to_owned());
     match res {
         Ok(_img) => {
-            let msg = format!("Image saved in {}.", destination_path);
+            let msg = format!(
+                "Image saved in {}.",
+                destination_path.to_string_lossy().to_owned()
+            );
             println!("{}", msg);
         }
         Err(e) => {

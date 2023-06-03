@@ -5,6 +5,7 @@ pub enum ArgErr {
     BadColorNumber(u8),
     CouldntReadValue(String),
     InvalidMaxColors(u8),
+    NotADir,
 }
 
 impl Display for ArgErr {
@@ -29,6 +30,10 @@ impl Display for ArgErr {
                 println!("Invalid number of max colors: {}", num);
                 write!(f, "Must be between 2 and 100.")
             }
+            ArgErr::NotADir => {
+                println!("Destination directory isn't a valid directory");
+                write!(f, "Please pass an existing folder to save into.")
+            }
         }
     }
 }
@@ -46,6 +51,20 @@ impl Display for FileErr {
             }
             FileErr::NotAnImage => {
                 write!(f, "Not an image file.")
+            }
+        }
+    }
+}
+
+pub enum GenerationErr {
+    CouldntCreatePallete,
+}
+
+impl Display for GenerationErr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            GenerationErr::CouldntCreatePallete => {
+                write!(f, "Couldn't generate palette from image.")
             }
         }
     }

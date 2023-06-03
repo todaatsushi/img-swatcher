@@ -35,6 +35,7 @@ impl Display for ArgErr {
 
 pub enum FileErr {
     CouldntRead,
+    NotAnImage,
 }
 
 impl Display for FileErr {
@@ -42,6 +43,9 @@ impl Display for FileErr {
         match self {
             FileErr::CouldntRead => {
                 write!(f, "Couldn't read the file. Check the logs for info.")
+            }
+            FileErr::NotAnImage => {
+                write!(f, "Not an image file.")
             }
         }
     }

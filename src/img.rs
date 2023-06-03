@@ -62,15 +62,14 @@ fn is_image(file: &DirEntry) -> bool {
     }
 }
 
-fn build_map_from_dir(paths: ReadDir) -> HashMap<String, Option<DynamicImage>> {
-    let mut store: HashMap<String, Option<DynamicImage>> = HashMap::new();
-    paths.into_iter().for_each(|p| {
-        let path = p.unwrap();
-        match is_image(&path) {
-            true => match get_img(&path.path()) {
+fn build_map_from_dir(paths: ReadDir) -> HashMap<PathBuf, Option<DynamicImage>> {
+    let mut store: HashMap<PathBuf, Option<DynamicImage>> = HashMap::new();
+    paths.into_iter().for_each(|dir| {
+        let entry = dir.unwrap();
+        match is_image(&entry) {
+            true => match get_img(&entry.path()) {
                 Some(img) => {
-                    let path_str = path.path().to_string_lossy().into_owned();
-                    store.insert(path_str, Some(img));
+                    store.insert(entry.path(), Some(img));
                 }
                 None => (),
             },
@@ -82,19 +81,18 @@ fn build_map_from_dir(paths: ReadDir) -> HashMap<String, Option<DynamicImage>> {
 
 fn build_map_from_file(
     file_path: PathBuf,
-) -> Result<HashMap<String, Option<DynamicImage>>, FileErr> {
-    let mut store: HashMap<String, Option<DynamicImage>> = HashMap::new();
+) -> Result<HashMap<PathBuf, Option<DynamicImage>>, FileErr> {
+    let mut store: HashMap<PathBuf, Option<DynamicImage>> = HashMap::new();
     match get_img(&file_path) {
         Some(img) => {
-            let path = file_path.to_str().unwrap().to_string();
-            store.insert(path, Some(img));
+            store.insert(file_path, Some(img));
         }
         None => return Err(FileErr::CouldntRead),
     };
     Ok(store)
 }
 
-pub fn open_images() -> Result<HashMap<String, Option<DynamicImage>>, FileErr> {
+pub fn open_images() -> Result<HashMap<PathBuf, Option<DynamicImage>>, FileErr> {
     match get_args() {
         Ok(args) => {
             let arg = &args[1];
